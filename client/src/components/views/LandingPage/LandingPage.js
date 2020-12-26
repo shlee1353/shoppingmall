@@ -7,9 +7,9 @@ import RadioBox from './Sections/RadioBox';
 import CheckBox from './Sections/CheckBox';
 import SearchFeature from './Sections/SearchFeature';
 import { continents, price } from './Sections/Datas';
-import { response } from 'express';
 
 function LandingPage() {
+
     const [Products, setProducts] = useState([])
     const [Skip, setSkip] = useState(0)
     const [Limit, setLimit] = useState(3)
@@ -23,18 +23,20 @@ function LandingPage() {
     const { Meta } = Card
 
     useEffect(() => {
-        const body = {
+
+        let body = {
             skip: Skip,
             limit: Limit
         }
+
         getProducts(body)
-    })
+    }, [])
 
     const getProducts = (body) => {
         axios.post('/api/product/products', body)
             .then(response => {
-                if(response.data.success) {
-                    if(body.loadMore) {
+                if (response.data.success) {
+                    if (body.loadMore) {
                         setProducts([...Products, ...response.data.productInfo])
                     } else {
                         setProducts(response.data.productInfo)
@@ -42,12 +44,39 @@ function LandingPage() {
 
                     setPostSize(response.data.postSize)
                 } else {
-                    alert("failed to load");
+                    alert("상품들을 가져오는데 실패 하였습니다.")
                 }
             })
     }
 
-    const showFilteredResults = () => {
+    const loadMoreHandler = () => {
+
+        let skip = Skip + Limit
+
+        let body = {
+            skip: skip,
+            limit: Limit,
+            loadMore: true
+        }
+
+        getProducts(body)
+        setSkip(skip)
+    }
+
+    const renderCards = Products.map((product, index) => {
+        return <Col lg={6} md={8} key={index}>
+            <Card
+                cover={<a href={`/product/${product._id}`}><ImageSlider images={product.images}/></a>}
+            >
+                <Meta
+                    title={product.title}
+                    description={`$${product.price}`}
+                />     
+            </Card>
+        </Col>
+    })
+
+    const showFilteredResults = (filters) => {
 
         let body = {
             skip: 0,
@@ -60,7 +89,7 @@ function LandingPage() {
     }
 
     const handlePrice = (value) => {
-        const data = price;
+        const data = price
         let array = [];
 
         data.forEach(item => {
@@ -69,6 +98,12 @@ function LandingPage() {
             }
         })
 
+        // for (let key in data) {
+        //     if(data[key]._id === parseInt(value, 10)) {
+        //         array = data[key].array
+        //     }
+        // }
+
         return array;
     }
 
@@ -76,6 +111,7 @@ function LandingPage() {
         const newFilters = {...Filters}
 
         newFilters[category] = filters
+
         if(category === "price") {
             let priceValues = handlePrice(filters)
             newFilters[category] = priceValues
@@ -83,6 +119,20 @@ function LandingPage() {
 
         showFilteredResults(newFilters)
         setFilters(newFilters)
+    }
+
+    const updateSearchTerm = (newSearchTerm) => {
+        
+        let body = {
+            skip: 0,
+            limit: Limit,
+            filters: Filters,
+            searchTerm: newSearchTerm
+        }
+
+        setSkip(0)
+        setSearchTerm(newSearchTerm)
+        getProducts(body)
     }
 
     return (

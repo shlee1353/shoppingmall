@@ -8,12 +8,12 @@ function FileUpload(props) {
     const [Images, setImages] = useState([])
 
     const dropHandler = (files) => {
+
         let formData = new FormData();
 
         const config = {
             header: {'content-type': 'multipart/form-data'}
         }
-
         formData.append("file", files[0])
 
         axios.post('/api/product/image', formData, config)
@@ -28,11 +28,13 @@ function FileUpload(props) {
     }
 
     const deleteHandler = (image) => {
-        const currentIndex = Images.indexOf(image)
+        const currentIndex = Images.indexOf(image);
         let newImages = [...Images]
         newImages.splice(currentIndex, 1)
         setImages(newImages)
+        props.refreshFunction(newImages)
     }
+
     return (
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <Dropzone onDrop={dropHandler}>

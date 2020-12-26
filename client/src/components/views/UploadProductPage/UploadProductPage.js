@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
 import {Typography, Button, Form, Input} from 'antd';
 import FileUpload from '../../utils/FileUpload';
-import Axios from 'axios';
-import { response } from 'express';
+import Axios from 'axios'; 
 
-const { TextArea } = Input;
+const { TextArea } =Input;
 
 const Continents = [
     { key: 1, value: "Africa" },
@@ -17,6 +16,7 @@ const Continents = [
 ]
 
 function UploadProductPage(props) {
+
     const [Title, setTitle] = useState("")
     const [Description, setDescription] = useState("")
     const [Price, setPrice] = useState(0)
@@ -44,6 +44,8 @@ function UploadProductPage(props) {
     }
 
     const submitHandler = (event) => {
+        event.preventDefault();
+
         if (!Title || !Description || !Price || !Continent || !Images) {
             return alert("모든 값을 넣어주셔야 합니다.")
         }
@@ -60,7 +62,7 @@ function UploadProductPage(props) {
 
         Axios.post('/api/product', body)
             .then(response => {
-                if(response.data.success) {
+                if (response.data.success) {
                     alert("상품 업로드에 성공 했습니다.")
                     props.history.push('/')
                 } else {
